@@ -7,7 +7,7 @@ devel/
 #ignore bag files
 *.bag
 
-
+*.vscode
 *bin/
 *build/
 *lib/
