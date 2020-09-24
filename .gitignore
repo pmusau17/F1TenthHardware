@@ -1,0 +1,8 @@
+#ignore build and devel
+build/
+devel/
+*.catkin_workspace
+*.rosinstall
+
+#ignore bag files
+*.bag
