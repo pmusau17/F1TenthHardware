@@ -15,10 +15,9 @@ import rospkg
 
 class pure_pursuit:
 
-    def __init__(self,racecar_name,waypoint_file):
+    def __init__(self,waypoint_file):
 
         # initialize class fields 
-        self.racecar_name = racecar_name
         self.waypoint_file = waypoint_file
 
         # pure pursuit parameters
@@ -31,13 +30,13 @@ class pure_pursuit:
         self.read_waypoints()
        
         # Publisher for 'drive_parameters' (speed and steering angle)
-        self.pub = rospy.Publisher(racecar_name+'/drive_parameters', drive_param, queue_size=1)
+        self.pub = rospy.Publisher('drive_parameters', drive_param, queue_size=1)
         # Publisher for the goal point
-        self.goal_pub = rospy.Publisher(racecar_name+'/goal_point', MarkerArray, queue_size="1")
-        self.considered_pub= rospy.Publisher(racecar_name+'/considered_points', MarkerArray, queue_size="1")
-        self.point_in_car_frame= rospy.Publisher(racecar_name+'/goal_point_car_frame', MarkerArray, queue_size="1")
+        self.goal_pub = rospy.Publisher('goal_point', MarkerArray, queue_size="1")
+        self.considered_pub= rospy.Publisher('considered_points', MarkerArray, queue_size="1")
+        self.point_in_car_frame= rospy.Publisher('goal_point_car_frame', MarkerArray, queue_size="1")
         # Subscriber to vehicle position 
-        rospy.Subscriber(racecar_name+"/odom", Odometry, self.callback, queue_size=1)
+        rospy.Subscriber("/zed/zed_node/camera_odom", Odometry, self.callback, queue_size=1)
 
     # Import waypoints.csv into a list (path_points)
     def read_waypoints(self):
@@ -134,7 +133,7 @@ class pure_pursuit:
 
         # goal point 
         goal_point = pts_infrontofcar[idx]
-        self.visualize_point([goal_point],self.goal_pub)
+        #self.visualize_point([goal_point],self.goal_pub)
 
         
       
@@ -144,7 +143,7 @@ class pure_pursuit:
         ygv = (-v1[0] * np.sin(yaw)) + (v1[1] * np.cos(yaw))
 
         vector = np.asarray([xgv,ygv])
-        self.visualize_point([vector],self.point_in_car_frame,frame='racecar/chassis',r=0.0,g=1.0,b=0.0)
+        #self.visualize_point([vector],self.point_in_car_frame,frame='racecar/chassis',r=0.0,g=1.0,b=0.0)
         
         # calculate the steering angle
         angle = math.atan2(ygv,xgv)
@@ -200,11 +199,10 @@ if __name__ == '__main__':
     rospy.init_node('pure_pursuit')
     #get the arguments passed from the launch file
     args = rospy.myargv()[1:]
-    # get the racecar name so we know what to subscribe to
-    racecar_name=args[0]
+
     # get the path to the file containing the waypoints
-    waypoint_file=args[1]
-    C = pure_pursuit(racecar_name,waypoint_file)  
+    waypoint_file=args[0]
+    C = pure_pursuit(waypoint_file)  
 
     # spin
     rospy.spin()

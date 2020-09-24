@@ -15,17 +15,13 @@ import rospkg
 
 class WaypointLogger():
 
-    def __init__(self,racecar_name):
-        self.racecar_name = racecar_name
-
+    def __init__(self):
         # use the rospack object to get paths
         rospack = rospkg.RosPack()
-        # get the worldname from the parameter server
-        world_name = rospy.get_param("/world_name")
-        #get the path for this paackage
+        #get the path for this package
         package_path=rospack.get_path('pure_pursuit')
         # get the pid to create "unique" filenames
-        self.filename=package_path+'/waypoints/{}_{}.csv'.format(world_name,os.getpid())
+        self.filename=package_path+'/waypoints/record_{}.csv'.format(os.getpid())
         self.file = open(self.filename, 'w')
 
         self.waypoints=[[0,0]]
@@ -48,18 +44,13 @@ class WaypointLogger():
  
     def listener(self):
         rospy.init_node('waypoints_logger', anonymous=True)
-        rospy.Subscriber(self.racecar_name+'/odom', Odometry, self.save_waypoint)
+        rospy.Subscriber('/zed/zed_node/camera_odom', Odometry, self.save_waypoint)
         rospy.spin()
 
 if __name__ == '__main__':
-    #get the arguments passed from the launch file
-    args = rospy.myargv()[1:]
-    
-    # get the path to the file containing the waypoints
-    racecar_name=args[0]
 
     # create Waypoint Object
-    wp = WaypointLogger(racecar_name)
+    wp = WaypointLogger()
     atexit.register(wp.shutdown)
     print('Saving waypoints...')
     try:
