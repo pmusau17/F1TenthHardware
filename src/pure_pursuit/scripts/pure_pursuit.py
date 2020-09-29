@@ -21,7 +21,7 @@ class pure_pursuit:
         self.waypoint_file = waypoint_file
 
         # pure pursuit parameters
-        self.LOOKAHEAD_DISTANCE = 1.1#1.70 # meters
+        self.LOOKAHEAD_DISTANCE = 0.18#0.70 # meters
         
         # Distance from the 
         self.distance_from_rear_wheel_to_front_wheel = 0.5
@@ -126,29 +126,30 @@ class pure_pursuit:
 
         pts_infrontofcar =np.asarray(pts_infrontofcar)
         # compute new distances
-        dist_arr = np.linalg.norm(pts_infrontofcar-curr_pos,axis=-1)- self.LOOKAHEAD_DISTANCE
+        if(pts_infrontofcar.shape[0]>0): 
+            dist_arr = np.linalg.norm(pts_infrontofcar-curr_pos,axis=-1)- self.LOOKAHEAD_DISTANCE
         
-        # get the point closest to the lookahead distance
-        idx = np.argmin(dist_arr)
+            # get the point closest to the lookahead distance
+            idx = np.argmin(dist_arr)
 
-        # goal point 
-        goal_point = pts_infrontofcar[idx]
-        #self.visualize_point([goal_point],self.goal_pub)
+            # goal point 
+            goal_point = pts_infrontofcar[idx]
+            self.visualize_point([goal_point],self.goal_pub)
 
+            # transform it into the vehicle coordinates
+            v1 = (goal_point - curr_pos)[0].astype('double')
+            xgv = (v1[0] * np.cos(yaw)) + (v1[1] * np.sin(yaw))
+            ygv = (-v1[0] * np.sin(yaw)) + (v1[1] * np.cos(yaw))
         
-      
-        # transform it into the vehicle coordinates
-        v1 = (goal_point - curr_pos)[0].astype('double')
-        xgv = (v1[0] * np.cos(yaw)) + (v1[1] * np.sin(yaw))
-        ygv = (-v1[0] * np.sin(yaw)) + (v1[1] * np.cos(yaw))
+            # calculate the steering angle
+            angle = math.atan2(ygv,xgv)
+            self.const_speed(angle)
 
-        vector = np.asarray([xgv,ygv])
-        #self.visualize_point([vector],self.point_in_car_frame,frame='racecar/chassis',r=0.0,g=1.0,b=0.0)
-        
-        # calculate the steering angle
-        angle = math.atan2(ygv,xgv)
-        self.const_speed(angle)
-        #self.set_speed(angle)
+        # right now just keep going straight but it will need to be more elegant
+        # TODO: make elegant
+        else:
+            rospy.logwarn("NO GOAL POINT")
+            self.const_speed(0.0)
    
     # USE THIS FUNCTION IF CHANGEABLE SPEED IS NEEDED
     def set_speed(self,angle):
@@ -185,7 +186,7 @@ class pure_pursuit:
         msg = drive_param()
         msg.header.stamp = rospy.Time.now()
         msg.angle = angle
-        msg.velocity = 1.0
+        msg.velocity = 0.5
         self.pub.publish(msg)
 
     # find the angle bewtween two vectors    
