@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# cython and anaconda GG
+import sys
+sys.path.insert(0,"/usr/local/lib/python2.7")
+sys.path.insert(0,'/usr/local/lib/python2.7/dist-packages')
 # packages
 import rospy
 import numpy as np
@@ -170,7 +174,8 @@ class ParticleFiler():
             stamp = rospy.Time.now()
 
         # this may cause issues with the TF tree. If so, see the below code.
-        self.pub_tf.sendTransform((pose[0],pose[1],0),tf.transformations.quaternion_from_euler(0, 0, pose[2]),  stamp , "/laser", "/map")
+        self.pub_tf.sendTransform((pose[0],pose[1],0),tf.transformations.quaternion_from_euler(0, 0, pose[2]), 
+               stamp , "/laser", "/map")
 
         # also publish odometry to facilitate getting the localization pose
         if self.PUBLISH_ODOM:
@@ -202,7 +207,7 @@ class ParticleFiler():
         map_laser_pos -= np.dot(tf.transformations.quaternion_matrix(tf.transformations.unit_vector(map_laser_rotation))[:3,:3], laser_base_link_offset).T
 
         # Publish transform
-        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , "/base_link_particle_estimate", "/map")
+        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , "/base_link", "/map")
 
     def visualize(self):
         '''
