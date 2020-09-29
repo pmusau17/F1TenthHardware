@@ -639,7 +639,7 @@ namespace zed_wrapper {
         mNhNs.param<std::string>("tracking/world_frame", mWorldFrameId, "map");
         mNhNs.param<std::string>("tracking/map_frame", mMapFrameId, "map");
         mNhNs.param<std::string>("tracking/odometry_frame", mOdometryFrameId, "odom");
-        mNhNs.param<std::string>("general/base_frame", mBaseFrameId, "base_link");
+        mNhNs.param<std::string>("general/base_frame", mBaseFrameId, "base_link_c");
         mNhNs.param<std::string>("general/camera_frame", mCameraFrameId, "zed_camera_center");
         mNhNs.param<std::string>("imu/imu_frame", mImuFrameId, "imu_link");
         mNhNs.param<std::string>("general/left_camera_frame", mLeftCamFrameId, "left_camera_frame");

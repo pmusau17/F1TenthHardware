@@ -3,7 +3,7 @@
 <!--launch gmapping version of slam from ros-->
    <node pkg="gmapping" type="slam_gmapping" name="gmapping">
        <param name="map_frame" value="map"/>
-       <param name="base_frame" value="base_link"/>
+       <param name="base_frame" value="base_link_c"/>
        <param name="odom_frame" value="/zed/zed_node/camera_odom" />
        <param name="delta" value="0.08" />
        <param name="maxUrange" value="10.0" />

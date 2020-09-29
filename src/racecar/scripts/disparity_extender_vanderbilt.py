@@ -156,7 +156,7 @@ class DisparityExtenderDriving(object):
         """Yeah nah this aint working for us: velocity=self.duty_cycle_from_distance(limited_ranges[540])
         print(velocity)"""
 
-        if(min(limited_ranges[480:601])<0.5):
+        if(min(limited_ranges[480:601])<0.25):
             self.publish_speed_and_angle(thresholded_angle,0.0)
             rospy.logwarn("STOOOOOOOPP")
         else:

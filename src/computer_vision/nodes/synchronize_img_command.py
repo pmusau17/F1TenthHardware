@@ -14,7 +14,6 @@ import rospkg
 
 class MessageSynchronizer:
     ''' Gathers messages with vehicle information that have similar time stamps
-
         /camera/zed/rgb/image_rect_color/compressed: 18 hz
         /camera/zed/rgb/image_rect_color: 18 hz
         /racecar/drive_parameters: 40 hz
@@ -28,6 +27,7 @@ class MessageSynchronizer:
         self.cv_bridge=CvBridge()
         self.count=0
         self.save_count=0
+        self.straight_count =0 
 
         #create the time synchronizer
         self.sub = ApproximateTimeSynchronizer([self.image_rect_color_left,self.image_rect_color_right,self.ackermann_stamped], queue_size = 20, slop = 0.05)
@@ -82,10 +82,16 @@ class MessageSynchronizer:
             os.makedirs(dirPath)
             print('does not exist')
 
-        if True:
+        if not "straight" in dirPath:
             self.save_count+=1
             cv2.imwrite(path,image)
-        print(self.save_count)
+       	    print(self.save_count)
+        else: 
+            self.straight_count+=1
+            if(self.straight_count%10 == 0):
+                cv2.imwrite(path,image)
+       	        print(self.save_count)
+
 
 if __name__=='__main__':
     rospy.init_node('image_command_sync')
