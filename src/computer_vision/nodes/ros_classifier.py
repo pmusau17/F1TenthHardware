@@ -3,6 +3,7 @@ import rospy
 import cv2
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np 
 import imutils
@@ -10,20 +11,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import time
 
-# sometimes GPU systems are annoying 
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import Session
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-sess = Session(config=config)
-sess.as_default()
-
 # import the custom message files defined the race package
 from racecar.msg import drive_param
 from racecar.msg import angle_msg
 
 #import the tensorflow package
 from tensorflow.python.keras.models import load_model
+from tensorflow.python.keras.backend import clear_session
 
 # import sys so we can use packages outside of this folder in
 # either python 2 or python 3, I know it's janky, chill
@@ -32,24 +26,43 @@ import os
 from pathlib import Path 
 #insert parent directory into the path
 sys.path.insert(0,str(Path(os.path.abspath(__file__)).parent.parent))
+print(sys.path)
 
 #import the preprocessing utils (helps with loading data, preprocessing)
 from preprocessing.utils import ImageUtils
 
+clear_session()
 
 class ROS_Classify:
 
     #define the constructor 
-    def __init__(self,racecar_name,model,decoupled=False,plot=False):
+    def __init__(self,model,decoupled=False,plot=False):
 
 
         self.cv_bridge=CvBridge()
-        self.image_topic=str(racecar_name)+'/camera/zed/rgb/image_rect_color'
+
+        self.image_rect_color_left=Subscriber('/zed/zed_node/left/image_rect_color',Image)
+        self.image_rect_color_right=Subscriber('/zed/zed_node/right/image_rect_color',Image)
+
+        #create the time synchronizer
+        self.sub = ApproximateTimeSynchronizer([self.image_rect_color_left,self.image_rect_color_right], queue_size = 50, slop = 0.05)
+
+        # load the model 
         self.model=load_model(model)
+
+        # keras predict function 
+        self.model._make_predict_function()
 
         self.count = 0
         self.util=ImageUtils()
-        # depends how the model was trained
+
+
+        #register the callback to the synchronizer
+        self.sub.registerCallback(self.image_callback)
+
+        # toggle plotting 
+        self.plot = plot
+        #depends how the model was trained
         try:
             self.height=self.model.layers[0].input_shape[1]
             self.width=self.model.layers[0].input_shape[2]
@@ -61,13 +74,11 @@ class ROS_Classify:
 
         self.decoupled=decoupled
         if (not self.decoupled):
-            self.pub=rospy.Publisher(racecar_name+'/drive_parameters', drive_param, queue_size=5)
+            self.pub=rospy.Publisher('drive_parameters', drive_param, queue_size=5)
         else:
-            self.pub=rospy.Publisher(racecar_name+'/angle_msg',angle_msg,queue_size=5)
-
-        self.image_sub=rospy.Subscriber(self.image_topic,Image,self.image_callback)
+            self.pub=rospy.Publisher('angle_msg',angle_msg,queue_size=5)
         
-        self.plot = plot
+
         if self.plot:
             #fields for plotting
             self.commands=[]
@@ -77,8 +88,6 @@ class ROS_Classify:
             self.fig = plt.figure()
             self.ax = self.fig.add_subplot(1, 1, 1)
             self.window=4000
-
-
             #Animation
             # Set up plot to call animate() function periodically
             ani = animation.FuncAnimation(self.fig, self.animate, fargs=(self.commands, self.times), interval=1000)
@@ -86,29 +95,38 @@ class ROS_Classify:
         
 
     #image callback
-    def image_callback(self,ros_image):
+    def image_callback(self,image_left,image_right):
         #convert the ros_image to an openCV image
         try:
-            orig_image=self.cv_bridge.imgmsg_to_cv2(ros_image,"bgr8")/255.0
+            orig_image=self.cv_bridge.imgmsg_to_cv2(image_left,"bgr8")/255.0
             cv_image=self.util.reshape_image(orig_image,self.height,self.width)
+            cv_image2=self.cv_bridge.imgmsg_to_cv2(image_right,"bgr8")/255.0
+            cv_image2=self.util.reshape_image(cv_image2,self.height,self.width)
             #print(cv_image.shape)
         except CvBridgeError as e:
             print(e)
 
-        #reshape the image so we can feed it ot the neural network
-        predict_image=np.expand_dims(cv_image, axis=0)
-        #make the prediction
-        pred=self.model.predict(predict_image)
-        self.count+=1
-        #publish the actuation command
-        if(self.count>20):
-            self.send_actuation_command(pred)
+        imgs = np.asarray([cv_image,cv_image2])
+        print(imgs.shape)
 
-        #uncomment the following to display the image classification
-        #cv2.imshow(self.classes[pred[0].argmax()],predict_image[0])
+    
+        pred=self.model.predict(imgs)
+        self.count+=1
+
+        pred1 = pred[0].argmax()
+        pred2 = pred[1].argmax()
+
+        print(self.classes[pred1],self.classes[pred2])
+
+        # #publish the actuation command
+        # if(self.count>20):
+        #     self.send_actuation_command(pred)
+
+        # #uncomment the following to display the image classification
+        # #cv2.imshow(self.classes[pred[0].argmax()],predict_image[0])
         
-        #log the result to the console
-        print("INFO prediction: {}".format(self.classes[pred[0].argmax()]))
+        # #log the result to the console
+        # print("INFO prediction: {}".format(self.classes[pred[0].argmax()]))
         
         #uncomment to show the original image
         #cv2.imshow("Original Image",orig_image)
@@ -169,16 +187,15 @@ if __name__=='__main__':
     #get the arguments passed from the launch file
     args = rospy.myargv()[1:]
     #get the racecar name so we know what to subscribe to
-    racecar_name=args[0]
     #get the keras model
-    model=args[1]
+    model=args[0]
 
 
     #if there's more than two arguments then its decoupled
     if len(args)>2:
-        il=ROS_Classify(racecar_name,model,decoupled=True)
+        il=ROS_Classify(model,decoupled=True)
     else:
-        il=ROS_Classify(racecar_name,model)
+        il=ROS_Classify(model)
     try: 
         rospy.spin()
     except KeyboardInterrupt:
