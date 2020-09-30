@@ -116,21 +116,14 @@ class ROS_Classify:
         pred1 = pred[0].argmax()
         pred2 = pred[1].argmax()
 
-        print(self.classes[pred1],self.classes[pred2])
+        pred = np.mean(pred,axis=0)
 
-        # #publish the actuation command
-        # if(self.count>20):
-        #     self.send_actuation_command(pred)
+        print(self.classes[pred1],self.classes[pred2],self.classes[pred.argmax()])
 
-        # #uncomment the following to display the image classification
-        # #cv2.imshow(self.classes[pred[0].argmax()],predict_image[0])
-        
-        # #log the result to the console
-        # print("INFO prediction: {}".format(self.classes[pred[0].argmax()]))
-        
-        #uncomment to show the original image
-        #cv2.imshow("Original Image",orig_image)
-        #cv2.waitKey(3) 
+        #publish the actuation command
+        if(self.count>20):
+            self.send_actuation_command(pred)
+
 
     #computes the actuation command to send to the car
     def send_actuation_command(self,pred):
@@ -158,7 +151,7 @@ class ROS_Classify:
             msg = drive_param()
             msg.header.stamp=rospy.Time.now()
             msg.angle = angle
-            msg.velocity = 1.0
+            msg.velocity = 0.5
         else:
             msg=angle_msg()
             msg.header.stamp=rospy.Time.now()
