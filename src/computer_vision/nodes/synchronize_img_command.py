@@ -88,7 +88,7 @@ class MessageSynchronizer:
        	    print(self.save_count)
         else: 
             self.straight_count+=1
-            if(self.straight_count%10 == 0):
+            if(self.straight_count%5 == 0):
                 cv2.imwrite(path,image)
        	        print(self.save_count)
 

@@ -31,7 +31,7 @@ class WaypointLogger():
         dist_arr = np.linalg.norm(np.asarray(self.waypoints)-pt,axis=-1)
         
         min_dist= np.min(dist_arr)
-        if min_dist>0.14142135623730953:
+        if min_dist>0.05142135623730953:
             self.waypoints.append([data.pose.pose.position.x,data.pose.pose.position.y])
          
             print("x: {}, y: {}".format(data.pose.pose.position.x,data.pose.pose.position.y))

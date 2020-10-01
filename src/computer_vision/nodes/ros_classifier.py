@@ -107,7 +107,7 @@ class ROS_Classify:
             print(e)
 
         imgs = np.asarray([cv_image,cv_image2])
-        print(imgs.shape)
+        #print(imgs.shape)
 
     
         pred=self.model.predict(imgs)
@@ -128,7 +128,7 @@ class ROS_Classify:
     #computes the actuation command to send to the car
     def send_actuation_command(self,pred):
         #get the label
-        label=self.classes[pred[0].argmax()]
+        label=self.classes[pred.argmax()]
         if (label=="left"):
             angle=0.5108652353
         elif (label=="right"):
@@ -151,7 +151,7 @@ class ROS_Classify:
             msg = drive_param()
             msg.header.stamp=rospy.Time.now()
             msg.angle = angle
-            msg.velocity = 0.5
+            msg.velocity = 0.4
         else:
             msg=angle_msg()
             msg.header.stamp=rospy.Time.now()
