@@ -11,6 +11,7 @@ steering_angle_to_servo_offset: 0.5479
 vesc_to_odom:
   publish_tf: true
 
+#old pseed max is 65000
 vesc_driver:
   port: /dev/vesc
   duty_cycle_min: 0.0
@@ -20,7 +21,7 @@ vesc_driver:
   brake_min: 0.0
   brake_max: 0.0
   speed_min: -4000
-  speed_max: 65000
+  speed_max: 4000
   position_min: 0.0
   position_max: 0.0
   servo_min: 0.15
