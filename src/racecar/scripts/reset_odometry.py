@@ -9,7 +9,7 @@ from numpy import linalg as LA
 from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
-
+import subprocess
 
 reset_odometry = rospy.ServiceProxy('/zed/zed_node/reset_odometry', Empty)
 reset_tracking = rospy.ServiceProxy('/zed/zed_node/reset_tracking', Empty)
@@ -30,8 +30,8 @@ def subscribe_data(data):
     y = data.pose.pose.position.y
     print(x,y,euler[2])
     if(abs(x) < 0.05 and abs(y)<0.05 and abs(euler[2])<0.09):
-        reset_odometry()
-        reset_tracking()
+        subprocess.call(["rosservice","call","/zed/zed_node/reset_tracking"])
+        subprocess.call(["rosservice","call", "/zed/zed_node/reset_odometry"])
         rospy.logwarn("reset_odometry")
 
 
@@ -39,8 +39,8 @@ def subscribe_data(data):
 
 def listener():
     rospy.init_node('reset_odom_node', anonymous=True)
-    rospy.wait_for_service('/zed/zed_node/reset_odometry')
-    rospy.wait_for_service('/zed/zed_node/reset_tracking')
+    #rospy.wait_for_service('/zed/zed_node/reset_odometry')
+    #rospy.wait_for_service('/zed/zed_node/reset_tracking')
     rospy.Subscriber('pf/pose/odom', Odometry, subscribe_data)
     rospy.spin()
 
