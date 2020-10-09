@@ -10,6 +10,7 @@
   </include>
 
   <node name="sim_connector" pkg="racecar" type="sim_connector.py" output="screen" />
+  <!--<node name="reset_odom" pkg="racecar" type="reset_odometry.py" output="screen" />-->
   <!--<node name="sanity_check" pkg="racecar" type="process_and_plot_lidar_data.py"/>-->
   <node name="key_board" pkg="racecar" type="keyboard.py" output="screen" />
 
