@@ -15,9 +15,10 @@ import rospkg
 
 class WaypointLogger():
 
-    def __init__(self):
+    def __init__(self,particle_filter=False):
         # use the rospack object to get paths
         rospack = rospkg.RosPack()
+        self.particle_filter=particle_filter
         #get the path for this package
         package_path=rospack.get_path('pure_pursuit')
         # get the pid to create "unique" filenames
@@ -43,14 +44,21 @@ class WaypointLogger():
         print('Goodbye')
  
     def listener(self):
-        rospy.init_node('waypoints_logger', anonymous=True)
-        rospy.Subscriber('/zed/zed_node/camera_odom', Odometry, self.save_waypoint)
+        if(not self.particle_filter):
+            rospy.Subscriber('/zed/zed_node/camera_odom', Odometry, self.save_waypoint)
+        else: 
+            rospy.Subscriber('pf/pose/odom', Odometry, self.save_waypoint,queue_size=5)
         rospy.spin()
 
 if __name__ == '__main__':
-
     # create Waypoint Object
-    wp = WaypointLogger()
+    rospy.init_node('waypoints_logger', anonymous=True)
+    args = rospy.myargv()[1:]
+    if(len(args)>0):
+    
+        wp = WaypointLogger(particle_filter=True)
+    else:
+        wp = WaypointLogger()
     atexit.register(wp.shutdown)
     print('Saving waypoints...')
     try:

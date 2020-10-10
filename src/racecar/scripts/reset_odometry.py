@@ -10,12 +10,15 @@ from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 import subprocess
-
-reset_odometry = rospy.ServiceProxy('/zed/zed_node/reset_odometry', Empty)
-reset_tracking = rospy.ServiceProxy('/zed/zed_node/reset_tracking', Empty)
+import os 
 
 
+# the null device is a device file that discards all data written to it but reports that the 
+# write operation succeeded
+devnull = open(os.devnull,'w')
+start = 0
 def subscribe_data(data):
+    global start
     quaternion = np.array([data.pose.pose.orientation.x, 
                            data.pose.pose.orientation.y, 
                            data.pose.pose.orientation.z, 
@@ -28,22 +31,23 @@ def subscribe_data(data):
     
     x = data.pose.pose.position.x
     y = data.pose.pose.position.y
-    print(x,y,euler[2])
-    if(abs(x) < 0.05 and abs(y)<0.05 and abs(euler[2])<0.09):
-        subprocess.call(["rosservice","call","/zed/zed_node/reset_tracking"])
-        subprocess.call(["rosservice","call", "/zed/zed_node/reset_odometry"])
+    now_time = rospy.Time.now()
+    duration = (now_time - start).to_sec() 
+    print(x,y,euler[2],duration)
+    if(abs(x) < 0.09 and abs(y)<0.09 and abs(euler[2])<0.15 and duration>5):
         rospy.logwarn("reset_odometry")
-
+        subprocess.Popen(["rosservice","call", "/zed/zed_node/reset_odometry"],stdout=devnull,stderr=devnull)
+        subprocess.Popen(["rosservice","call","/zed/zed_node/reset_tracking"],stdout=devnull,stderr=devnull)
+	start = rospy.Time.now()
 
 
 
 def listener():
-    rospy.init_node('reset_odom_node', anonymous=True)
-    #rospy.wait_for_service('/zed/zed_node/reset_odometry')
-    #rospy.wait_for_service('/zed/zed_node/reset_tracking')
     rospy.Subscriber('pf/pose/odom', Odometry, subscribe_data)
     rospy.spin()
 
 
 if __name__=="__main__":
+    rospy.init_node('reset_odom_node', anonymous=True)
+    start = rospy.Time.now() 
     listener()

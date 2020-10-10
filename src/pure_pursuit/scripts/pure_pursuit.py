@@ -15,7 +15,7 @@ import rospkg
 
 class pure_pursuit:
 
-    def __init__(self,waypoint_file):
+    def __init__(self,waypoint_file,particle_filter=False):
 
         # initialize class fields 
         self.waypoint_file = waypoint_file
@@ -36,7 +36,10 @@ class pure_pursuit:
         self.considered_pub= rospy.Publisher('considered_points', MarkerArray, queue_size="1")
         self.point_in_car_frame= rospy.Publisher('goal_point_car_frame', MarkerArray, queue_size="1")
         # Subscriber to vehicle position 
-        rospy.Subscriber("/zed/zed_node/camera_odom", Odometry, self.callback, queue_size=1)
+        if(not particle_filter):
+            rospy.Subscriber("/zed/zed_node/camera_odom", Odometry, self.callback, queue_size=5)
+        else:
+            rospy.Subscriber('pf/pose/odom', Odometry, self.callback,queue_size=5)
 
     # Import waypoints.csv into a list (path_points)
     def read_waypoints(self):
@@ -200,10 +203,12 @@ if __name__ == '__main__':
     rospy.init_node('pure_pursuit')
     #get the arguments passed from the launch file
     args = rospy.myargv()[1:]
-
     # get the path to the file containing the waypoints
     waypoint_file=args[0]
-    C = pure_pursuit(waypoint_file)  
-
+    if(len(args)>1):
+    
+        C = pure_pursuit(waypoint_file,particle_filter=True)
+    else:
+        C = pure_pursuit(waypoint_file)
     # spin
     rospy.spin()
