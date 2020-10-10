@@ -79,7 +79,7 @@ class MessageSynchronizer:
 
         if(self.count % 1==0 and ackermann_msg.drive.speed>0.03):
             dirPath = os.path.split(save_path)[0]
-            if  True:
+            if  not "straight" in dirPath:
                 self.save_image(cv_image,save_path)
                 self.save_image(cv_image2,save_path2)
                 np.save(save_path.replace(".png",".npy"),limited_ranges)
