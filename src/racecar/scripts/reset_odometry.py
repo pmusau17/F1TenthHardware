@@ -33,12 +33,12 @@ def subscribe_data(data):
     y = data.pose.pose.position.y
     now_time = rospy.Time.now()
     duration = (now_time - start).to_sec() 
-    print(x,y,euler[2],duration)
+    #print(x,y,euler[2],duration)
     if(abs(x) < 0.09 and abs(y)<0.09 and abs(euler[2])<0.15 and duration>5):
         rospy.logwarn("reset_odometry")
         subprocess.Popen(["rosservice","call", "/zed/zed_node/reset_odometry"],stdout=devnull,stderr=devnull)
         subprocess.Popen(["rosservice","call","/zed/zed_node/reset_tracking"],stdout=devnull,stderr=devnull)
-	start = rospy.Time.now()
+        start = rospy.Time.now()
 
 
 
