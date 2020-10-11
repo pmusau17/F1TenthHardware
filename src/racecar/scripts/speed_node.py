@@ -15,7 +15,7 @@ class SpeedManager:
         while not rospy.is_shutdown():
             msg=velocity_msg()
             msg.header.stamp=rospy.Time.now()
-            msg.velocity=1.0
+            msg.velocity=0.5
             self.pub.publish(msg)
             r.sleep()            
 

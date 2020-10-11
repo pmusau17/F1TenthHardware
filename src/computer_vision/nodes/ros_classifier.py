@@ -2,7 +2,7 @@
 import rospy
 import cv2
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np 
@@ -41,8 +41,8 @@ class ROS_Classify:
 
         self.cv_bridge=CvBridge()
 
-        self.image_rect_color_left=Subscriber('/zed/zed_node/left/image_rect_color',Image)
-        self.image_rect_color_right=Subscriber('/zed/zed_node/right/image_rect_color',Image)
+        self.image_rect_color_left=Subscriber('/zed/zed_node/left/image_rect_color/compressed',CompressedImage)
+        self.image_rect_color_right=Subscriber('/zed/zed_node/right/image_rect_color/compressed',CompressedImage)
 
         #create the time synchronizer
         self.sub = ApproximateTimeSynchronizer([self.image_rect_color_left,self.image_rect_color_right], queue_size = 50, slop = 0.05)
@@ -98,9 +98,9 @@ class ROS_Classify:
     def image_callback(self,image_left,image_right):
         #convert the ros_image to an openCV image
         try:
-            orig_image=self.cv_bridge.imgmsg_to_cv2(image_left,"bgr8")/255.0
+            orig_image=self.cv_bridge.compressed_imgmsg_to_cv2(image_left,"bgr8")/255.0
             cv_image=self.util.reshape_image(orig_image,self.height,self.width)
-            cv_image2=self.cv_bridge.imgmsg_to_cv2(image_right,"bgr8")/255.0
+            cv_image2=self.cv_bridge.compressed_imgmsg_to_cv2(image_right,"bgr8")/255.0
             cv_image2=self.util.reshape_image(cv_image2,self.height,self.width)
             #print(cv_image.shape)
         except CvBridgeError as e:
@@ -185,7 +185,7 @@ if __name__=='__main__':
 
 
     #if there's more than two arguments then its decoupled
-    if len(args)>2:
+    if len(args)>1:
         il=ROS_Classify(model,decoupled=True)
     else:
         il=ROS_Classify(model)

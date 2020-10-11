@@ -200,7 +200,7 @@ if __name__=='__main__':
 
 
     #if there's more than two arguments then its decoupled
-    if len(args)>2:
+    if len(args)>1:
         il=ROS_Classify(model,decoupled=True)
     else:
         il=ROS_Classify(model)
