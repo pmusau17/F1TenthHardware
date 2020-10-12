@@ -153,7 +153,7 @@ class DisparityExtenderDriving(object):
         if(min(limited_ranges[480:601])<0.3):
             self.publish_speed_and_angle(thresholded_angle,0.0)
         else:
-            self.publish_speed_and_angle(thresholded_angle,0.4)
+            self.publish_speed_and_angle(thresholded_angle,0.7)
 
 
     """Scale the speed in accordance to the forward distance"""
