@@ -150,7 +150,7 @@ class DisparityExtenderDriving(object):
         thresholded_angle = np.clip(thresholded_angle,-0.5108652353,0.5108652353)
 
         # specify the speed the car should move at 
-        if(min(limited_ranges[480:601])<0.3):
+        if(min(limited_ranges[480:601])<1.0):
             self.publish_speed_and_angle(thresholded_angle,0.0)
         else:
             self.publish_speed_and_angle(thresholded_angle,0.7)
