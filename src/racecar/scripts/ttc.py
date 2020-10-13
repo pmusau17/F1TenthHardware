@@ -26,7 +26,7 @@ class Safety(object):
         self.ttc_pub=rospy.Publisher('ttc',stamped_ttc,queue_size=10)
         # Initialize subscribers
         self.scan_subscriber=Subscriber('scan',LaserScan,queue_size=10)
-        self.odom_subscriber=Subscriber('pf/pose/odom',Odometry,queue_size=10)
+        self.odom_subscriber=Subscriber('odom',Odometry,queue_size=10)
 
         #create the time synchronizer
         self.sub = ApproximateTimeSynchronizer([self.scan_subscriber,self.odom_subscriber], queue_size = 100, slop = 0.05)
