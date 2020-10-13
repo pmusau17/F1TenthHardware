@@ -31,8 +31,9 @@ class genSysIDData:
         # The data will be stored in a csv file in the csv directory
         self.save_path_root=r.get_path('racecar')+'/sys_id/csv'
         self.odometry_sub=Subscriber('pf/pose/odom', Odometry)
+        self.vesc_odom = Subscriber('odom',Odometry)
         self.ackermann_stamped=Subscriber('/ackermann_cmd_mux/input/teleop',AckermannDriveStamped)
-        self.sub = ApproximateTimeSynchronizer([self.odometry_sub,self.ackermann_stamped], queue_size = 20, slop = 0.020)
+        self.sub = ApproximateTimeSynchronizer([self.odometry_sub,self.ackermann_stamped,self.vesc_odom], queue_size = 20, slop = 0.020)
 
         self.campaign = 0
         self.filename=self.save_path_root+'{}_{}_{}.csv'.format("data",os.getpid(),self.campaign)
@@ -48,7 +49,7 @@ class genSysIDData:
 
 
     #callback for the synchronized messages
-    def master_callback(self,odom_msg,ackermann_msg): 
+    def master_callback(self,odom_msg,ackermann_msg,vesc_odom): 
         
 
         # position 
@@ -62,9 +63,9 @@ class genSysIDData:
                                      odom_msg.pose.pose.orientation.w])
 
         # linear velocity 
-        velx = odom_msg.twist.twist.linear.x
-        vely = odom_msg.twist.twist.linear.y
-        velz = odom_msg.twist.twist.linear.z
+        velx = vesc_odom.twist.twist.linear.x
+        vely = vesc_odom.twist.twist.linear.y
+        velz = vesc_odom.twist.twist.linear.z
 
 
 

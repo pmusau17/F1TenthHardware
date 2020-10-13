@@ -147,13 +147,13 @@ class DisparityExtenderDriving(object):
 
         #change the steering angle based on whether we are safe
         thresholded_angle=self.adjust_turning_for_safety(behind_car_left,behind_car_right,thresholded_angle)
-        thresholded_angle = np.clip(thresholded_angle,-0.5108652353,0.5108652353)
+        thresholded_angle = np.clip(thresholded_angle,-0.6108652353,0.6108652353)
 
         # specify the speed the car should move at 
         if(min(limited_ranges[480:601])<1.0):
             self.publish_speed_and_angle(thresholded_angle,0.0)
         else:
-            self.publish_speed_and_angle(thresholded_angle,0.7)
+            self.publish_speed_and_angle(thresholded_angle,0.4)
 
 
     """Scale the speed in accordance to the forward distance"""

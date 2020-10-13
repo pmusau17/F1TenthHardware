@@ -207,7 +207,7 @@ class ParticleFiler():
         map_laser_pos -= np.dot(tf.transformations.quaternion_matrix(tf.transformations.unit_vector(map_laser_rotation))[:3,:3], laser_base_link_offset).T
 
         # Publish transform
-        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , "/base_link", "/map")
+        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , "/base_link_c", "/map")
 
     def visualize(self):
         '''
