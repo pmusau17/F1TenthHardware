@@ -47,9 +47,9 @@ ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
 double sim_time = 1.0;
-double walltime = 25; // 25 ms corresponds to 40 hz 
+double walltime = 95; // 25 ms corresponds to 40 hz 
 int markers_allocated = 1;
-bool bloat_reachset = false;
+bool bloat_reachset = true;
 double ttc = 0.0;
 
 
@@ -57,7 +57,7 @@ double ttc = 0.0;
 
 
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
+void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg,const nav_msgs::Odometry::ConstPtr& speed_odom_msg)
 {
   using std::cout;
   using std::endl;
@@ -69,7 +69,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,1.0);
+  sim_time = fmin(1.5*ttc,0.5);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -87,13 +87,13 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   m.getRPY(roll, pitch, yaw);
 
   // normalize the speed 
-  tf::Vector3 speed = tf::Vector3(msg->twist.twist.linear.x, msg->twist.twist.linear.x, 0.0);
+  tf::Vector3 speed = tf::Vector3(speed_odom_msg->twist.twist.linear.x, speed_odom_msg->twist.twist.linear.x, 0.0);
   lin_speed = speed.length();
 
-  cout << "x: " << x;
-  cout << " y: " << y;
-  cout << " yaw: " << yaw;
-  cout << " speed: " << lin_speed << endl;
+  //cout << "x: " << x;
+  //cout << " y: " << y;
+  //cout << " yaw: " << yaw;
+  //cout << " speed: " << lin_speed << endl;
 
 
   u = velocity_msg->velocity;
@@ -240,17 +240,18 @@ int main(int argc, char **argv)
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "angle_msg", 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "ttc", 10);
+    message_filters::Subscriber<nav_msgs::Odometry> odom_sub2(n, "odom", 10);
     
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("/ackermann_cmd_mux/input/teleop", 10);
-    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "reach_hull", 100 );
+    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "reach_hull", 10 );
   
     // sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
 
-    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc,nav_msgs::Odometry> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub);
-    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub,odom_sub2);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5));
     ros::Rate r(80);
     while(ros::ok())
     {
