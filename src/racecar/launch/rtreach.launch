@@ -28,7 +28,8 @@
   <!--particle_filter-->
   <include file="$(find particle_filter)/launch/localize.launch"/>
 
-  <node name="key_board" pkg="racecar" type="keyboard.py" output="screen" />
+  <!-- sanity check for wall points -->
+  <node name="visualize_node" pkg="racecar" type="visualize_wall_markers.py" args="fgh_obstacles.txt" output="log" />
 
   <!--Launch the zed camera node -->
   <include file="$(find zed_wrapper)/launch/zed.launch"/>
