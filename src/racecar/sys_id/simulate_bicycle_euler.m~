@@ -4,7 +4,7 @@ function xp = simulate_bicycle_euler(x,u,stepSize)
 % sysid parameters
 ca = 2.98197285917255;
 cm = 0.00374171122018418;
-ch = -222.187427243280;
+ch = [-222.187427243280];
 lf = 0.225;
 lr = 0.225;
 theta = x(4);

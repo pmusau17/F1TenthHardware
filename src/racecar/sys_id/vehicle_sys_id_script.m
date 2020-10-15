@@ -1,31 +1,32 @@
 % load the data
-exp1 = load_experiment_data('csvdata_18277_0.csv',1);
-exp2 = load_experiment_data('csvdata_18277_1.csv',1);
-exp3 = load_experiment_data('csvdata_18277_3.csv',1);
-exp4 = load_experiment_data('csvdata_18277_4.csv',1);
-exp5 = load_experiment_data('csvdata_18277_6.csv',1);
-exp6 = load_experiment_data('csvdata_18277_7.csv',1);
+exp3 = load_experiment_data('csvdata_29397_2.csv',1);
+exp4 = load_experiment_data('csvdata_29397_3.csv',1);
+exp5 = load_experiment_data('csvdata_29397_4.csv',1);
 
-exp7 = load_experiment_data('csvdata_22648_0.csv',1);
-exp8 = load_experiment_data('csvdata_22648_1.csv',1);
-exp9 = load_experiment_data('csvdata_22648_2.csv',1);
-exp10 = load_experiment_data('csvdata_22648_3.csv',1);
 
-%plot_race(exp7);
-%plot_race(exp8);
-%plot_race(exp9);
-%plot_race(exp10);
-
+%plot_race(exp5);
+% plot_race(exp8);
+% plot_race(exp9);
+% plot_race(exp10);
+% 
 % Merge the data
-data_est = merge(exp1,exp2,exp3,exp4,exp5,exp6,exp7,exp8,exp9,exp10);
+data_est = merge(exp4,exp5,exp3);
 
-num_experiments = 10;
+num_experiments = 3;
 
+
+% % specify the initial parameters
+%  ca = 1.1418;
+%  cm = 0.0092; 
+%  ch = -120.63;
+%  lf = 0.225;%0.255;
+%  lr = 0.225;%0.225;
+%  parameters    = {ca,cm,ch,lf,lr};
 
 % specify the initial parameters
- ca = 1.1418;
- cm = 0.0092; 
- ch = -120.63;
+ ca = 1.9569;
+ cm = 0.0342; 
+ ch = - 37.1967;
  lf = 0.225;%0.255;
  lr = 0.225;%0.225;
  parameters    = {ca,cm,ch,lf,lr};
