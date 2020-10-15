@@ -18,13 +18,18 @@ xe =cell2mat(xe);
 
 err = immse(x,xe);
 
-fig= figure();
-set(gcf, 'Position',  [100, 100, 900, 900])
+
+
+%change to the desired value     
+fig = figure();
+set(gcf, 'Position',  [100, 100, 900, 900]);
+
+
 
 subplot(2,2,[1,2]);
-plot(t,x(4,:),'DisplayName','ground-truth')
+plot(t,x(4,:),'DisplayName','ground-truth,gazebo','LineWidth',2)
 hold on;
-plot(t,xe(4,:),'DisplayName','sys-id model')
+plot(t,xe(4,:),'DisplayName','sys-id model','LineWidth',2)
 xlabel('t (seconds)') 
 ylabel('Vehicle heading (radians)') 
 title("Vehicle heading")
@@ -32,17 +37,21 @@ legend
 
 
 subplot(2,2,[3,4]);
-plot(x(1,:),x(2,:),'DisplayName','ground-truth,gazebo')
+plot(x(1,:),x(2,:),'DisplayName','ground-truth,gazebo','LineWidth',2)
 hold on;
-plot(xe(1,:),xe(2,:),'DisplayName','sys-id model')
+plot(xe(1,:),xe(2,:),'DisplayName','sys-id model','LineWidth',2)
+plot(x(1,1),x(2,1),'kx','DisplayName','init','LineWidth',3)
 hold off;
-xlabel('x') 
-ylabel('y') 
-title("Position of Vehicle")
+xlabel('x (meters)') 
+ylabel('y (meters)') 
+title("Vehicle Position (map frame)")
 legend
-sgtitle(strcat('State-Vector MSE=',string(err)))
+set(findobj(gcf,'type','axes'),'FontName','Calibri','FontSize',11,'FontWeight','Bold', 'LineWidth', 2,'layer','top');
+
+sgt =sgtitle(strcat('Validation MSE=',string(err)));
+sgt.FontSize = 20;
 figname = split(strrep(csv_filename,'csv/',''),".");
-savename = strcat("plots/",figname(1),".jpg");
+savename = strcat("plots/",figname(1),".png");
 saveas(fig,savename);
 end
 
