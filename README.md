@@ -2,6 +2,9 @@
 
 This repository contains a host of ROS package for the F1Tenth Autonomous Racing Competition. Particularly it contains the ros implementation for the Traxxas Harware Platform
 
+### Real-time Reachability Experiments
+![LEC_GIF](images/hardware_experiments.gif)
+
 ### Important Sensor Topics (In my humble opinion)
 
 - /ackermann_cmd_mux/input/teleop
