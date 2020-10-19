@@ -2,7 +2,6 @@
 import rospy
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
-from nav_msgs.msg import OccupancyGrid
 import matplotlib.pyplot as plt
 import rospkg 
 
@@ -15,7 +14,7 @@ class GenerateMap:
        Note: -1: Unknown
               0: Free
               100: Occupied """
-    def __init__(self,threshold=0.65,name="porto"):
+    def __init__(self,threshold=0.65,name="fgh"):
         rospy.wait_for_service('static_map')
         self.srv_proxy = rospy.ServiceProxy('static_map', GetMap)
         self.threshold = threshold
@@ -25,10 +24,12 @@ class GenerateMap:
         self.x_free = []
         self.y_free = []
         self.name = name
+        self.offset_x = 2.59
+        self.offset_y = 2.53
 
         # use the rospack object to get paths
         rospack = rospkg.RosPack()
-        package_path=rospack.get_path('race')
+        package_path=rospack.get_path('racecar')
         # get the pid to create "unique" filenames
         self.filename=package_path+'/maps/{}_obstacles.txt'.format(self.name)
         self.filename2=package_path+'/maps/{}_freespace.txt'.format(self.name)
@@ -56,48 +57,41 @@ class GenerateMap:
         msg = self.srv_proxy().map 
 
         # map metadata
-        origin =[msg.info.origin.position.x,msg.info.origin.position.y]
+        origin =[msg.info.origin.position.x+self.offset_x,msg.info.origin.position.y-self.offset_y]
         res = msg.info.resolution
 
         map_data= np.asarray(msg.data)
-        grid_size=(msg.info.width,msg.info.height)
+        grid_size=(msg.info.height,msg.info.width)
         map_data = map_data.reshape(grid_size)
 
-        occ_x,occ_y = np.where(map_data==100)
-        occ_x_free,occ_y_free = np.where(map_data==0)
 
-        print(len(occ_x))
-        for i in range(len(occ_x)):
-            x_point = res*occ_x[i] + origin[0]
-            y_point = res*occ_y[i] + origin[0]
-            self.points.append((x_point,y_point))
-            self.x.append(y_point)
-            self.y.append(x_point)
-
-        
-        self.points=np.asarray(self.points)
-
-        for i in range(len(occ_x_free)):
-            x_point = res*occ_x_free[i] + origin[0]
-            y_point = res*occ_y_free[i] + origin[0]
-
-            pp = np.asarray([x_point,y_point])
-            
-            dists = np.linalg.norm((self.points - pp),axis = -1)
-            if(dists.min()>1.0):
-                self.x_free.append(y_point)
-                self.y_free.append(x_point)
-        print(len(self.x_free))
+        for i in range(map_data.shape[0]):
+            for j in range(map_data.shape[1]):
+                if(map_data[i][j]==100):
+                    x_point = res*i + origin[0]
+                    y_point = res*j + origin[1]
+                    self.x.append(y_point)
+                    self.y.append(x_point)
+                    self.points.append((y_point,x_point))
+                elif(map_data[i][j]==0):
+                    x_point = res*i + origin[0]
+                    y_point = res*j + origin[1]
+                    pp = np.asarray([y_point,x_point])
+                    dists = np.linalg.norm((self.points - pp),axis = -1)
+                    if(dists.min()>0.5):
+                        self.x_free.append(y_point)
+                        self.y_free.append(x_point)
         self.save_points()
             
         
         plt.plot(self.x,self.y,'ro')
         plt.plot(self.x_free,self.y_free,'bo')
         plt.title('Plot of obstacles in track: {}'.format(self.name))
-        plt.ylabel('x')
-        plt.xlim([-15,15])
-        plt.ylim([-15,15])
-        plt.xlabel('y')
+        plt.ylabel('y')
+        plt.xlim([np.min(self.x)-1,np.max(self.x)+1])
+        plt.ylim([np.min(self.y)-1,np.max(self.y)+1])
+        #plt.ylim([-15,15])
+        plt.xlabel('x')
         plt.show()
 
 

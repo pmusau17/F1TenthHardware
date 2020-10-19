@@ -51,6 +51,7 @@ add_message_files(
    angle_msg.msg
    prediction.msg
    velocity_msg.msg
+   stamped_ttc.msg
  )
 
 ## Generate services in the 'srv' folder

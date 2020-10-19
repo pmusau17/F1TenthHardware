@@ -1,0 +1,36 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="racecar_version" default="$(optenv RACECAR_VERSION racecar-v2)" doc="system version [racecar-v1, racecar-v2]" />
+  <arg name="imu_model" default="$(optenv RACECAR_IMU razor_imu_m0)" doc="imu sensor types [razor_imu, razor_imu_m0]" />
+  <arg name="run_camera" default="false"/>
+  <arg name="map_file" default= "patmap4.yaml"/>
+  <include file="$(find racecar)/launch/includes/$(arg racecar_version)-teleop.launch.xml">
+    <arg name="imu_model" value="$(arg imu_model)" />
+    <arg name="run_camera" value="$(arg run_camera)" />
+  </include>
+
+
+
+  <!--node that resets camera odometry each lap-->
+  <node name="reset_odom" pkg="racecar" type="reset_odometry.py" output="log" />
+  
+  <!--node that resets camera odometry each lap-->
+  <node name="ttc" pkg="racecar" type="ttc.py" output="screen" />
+
+  <!--map server-->
+  <node pkg='map_server2' name="map_server" type="map_server" args="$(find racecar)/maps/$(arg map_file)"/>
+  <!--speed node-->
+  <node name="speed_node" pkg="racecar" type="speed_node.py" output="log" />
+
+  <!--safety node-->
+  <node name="safety_node" pkg="racecar" type="safety_controller.py" args="scan safety" output="log"/>
+
+  <!--particle_filter-->
+  <include file="$(find particle_filter)/launch/localize.launch"/>
+
+  <!-- sanity check for wall points -->
+  <node name="visualize_node" pkg="racecar" type="visualize_wall_markers.py" args="fgh_obstacles.txt" output="log" />
+
+  <!--Launch the zed camera node -->
+  <include file="$(find zed_wrapper)/launch/zed.launch"/>
+</launch>
