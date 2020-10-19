@@ -2,7 +2,7 @@
 import rospy
 import cv2
 from std_msgs.msg import String
-from sensor_msgs.msg import Image,LaserScan
+from sensor_msgs.msg import Image,LaserScan,CompressedImage
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np 
@@ -26,7 +26,6 @@ import os
 from pathlib import Path 
 #insert parent directory into the path
 sys.path.insert(0,str(Path(os.path.abspath(__file__)).parent.parent))
-print(sys.path)
 
 #import the preprocessing utils (helps with loading data, preprocessing)
 from preprocessing.utils import ImageUtils
@@ -41,8 +40,8 @@ class ROS_Classify:
 
         self.cv_bridge=CvBridge()
 
-        self.image_rect_color_left=Subscriber('/zed/zed_node/left/image_rect_color',Image)
-        self.image_rect_color_right=Subscriber('/zed/zed_node/right/image_rect_color',Image)
+        self.image_rect_color_left=Subscriber('/zed/zed_node/left/image_rect_color/compressed',CompressedImage)
+        self.image_rect_color_right=Subscriber('/zed/zed_node/right/image_rect_color/compressed',CompressedImage)
         self.lidar_sub=Subscriber('scan',LaserScan)
 
         #create the time synchronizer
@@ -103,9 +102,11 @@ class ROS_Classify:
     def image_callback(self,image_left,image_right,lidar_msg):
         #convert the ros_image to an openCV image
         try:
-            orig_image=self.cv_bridge.imgmsg_to_cv2(image_left,"bgr8")/255.0
+            #orig_image=self.cv_bridge.imgmsg_to_cv2(image_left,"bgr8")/255.0
+            orig_image=self.cv_bridge.compressed_imgmsg_to_cv2(image_left,"bgr8")/255.0
             cv_image=self.util.reshape_image(orig_image,32,32)
-            cv_image2=self.cv_bridge.imgmsg_to_cv2(image_right,"bgr8")/255.0
+            #cv_image2=self.cv_bridge.imgmsg_to_cv2(image_right,"bgr8")/255.0
+            cv_image2=self.cv_bridge.compressed_imgmsg_to_cv2(image_right,"bgr8")/255.0
             cv_image2=self.util.reshape_image(cv_image2,32,32)
             #print(cv_image.shape)
         except CvBridgeError as e:
@@ -165,7 +166,7 @@ class ROS_Classify:
             msg = drive_param()
             msg.header.stamp=rospy.Time.now()
             msg.angle = angle
-            msg.velocity = 0.4
+            msg.velocity = 0.7
         else:
             msg=angle_msg()
             msg.header.stamp=rospy.Time.now()
@@ -199,7 +200,7 @@ if __name__=='__main__':
 
 
     #if there's more than two arguments then its decoupled
-    if len(args)>2:
+    if len(args)>1:
         il=ROS_Classify(model,decoupled=True)
     else:
         il=ROS_Classify(model)
