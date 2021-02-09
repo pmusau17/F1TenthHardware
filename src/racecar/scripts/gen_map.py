@@ -24,8 +24,8 @@ class GenerateMap:
         self.x_free = []
         self.y_free = []
         self.name = name
-        self.offset_x = 2.59
-        self.offset_y = 2.53
+        self.offset_x = 0
+        self.offset_y = 0
 
         # use the rospack object to get paths
         rospack = rospkg.RosPack()
@@ -57,7 +57,7 @@ class GenerateMap:
         msg = self.srv_proxy().map 
 
         # map metadata
-        origin =[msg.info.origin.position.x+self.offset_x,msg.info.origin.position.y-self.offset_y]
+        origin =[msg.info.origin.position.y+self.offset_x,msg.info.origin.position.x-self.offset_y]
         res = msg.info.resolution
 
         map_data= np.asarray(msg.data)
