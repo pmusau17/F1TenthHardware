@@ -1,23 +1,26 @@
 <!-- -*- mode: XML -*- -->
 <launch>
 
+  <arg name="namespace" default="racecar2"/>
+
+ 
   <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_imu" 
-        args="0.245 0.0 0.117    0.7071067811865475 0.7071067811865475 0.0 0.0 /base_link /base_imu_link" />
+        args="0.245 0.0 0.117    0.7071067811865475 0.7071067811865475 0.0 0.0 /$(arg namespace)/base_link /$(arg namespace)/base_imu_link" />
 
   <!--<node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_laser" 
         args="0.285 0.0 0.127 0.0 0.0 0.0 1.0 /base_link_c /laser" />-->
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_laser" 
-        args="0.0 0.0 0.0762 0.0 0.0 0.0 1.0 /base_link_c /laser" />
+        args="0.0 0.0 0.0762 0.0 0.0 0.0 1.0 /$(arg namespace)/base_link_c /$(arg namespace)/laser" />
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_base_footprint" 
-        args="0.0 0.0 0.0     0.0 0.0 0.0 1.0 /base_link /base_footprint" />
+        args="0.0 0.0 0.0     0.0 0.0 0.0 1.0 /$(arg namespace)/base_link /$(arg namespace)/base_footprint" />
   
 <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom" 
-        args="0 0.0 0 0.0 0.0 0.0 1.0 /map /odom" />
+        args="0 0.0 0 0.0 0.0 0.0 1.0 /map /$(arg namespace)/odom" />
 
 <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_camera_odom" 
-        args="0 0.0 0 0.0 0.0 0.0 1.0 /map /camera_odom" />
+        args="0 0.0 0 0.0 0.0 0.0 1.0 /map /$(arg namespace)/camera_odom" />
 
 <!--<node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_base_link" 
         args="0.285 0.0 0.117 0.0 0.0 0.0 1.0 /base_link /zed_camera_center" />-->

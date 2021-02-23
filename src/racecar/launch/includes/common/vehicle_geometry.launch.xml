@@ -6,6 +6,9 @@
   <arg name="vehicle_geometry_config" default="$(find racecar)/config/$(arg racecar_version)/vehicle_geometry.yaml" />
   <arg name="vehicle_footprint_config" default="$(find racecar)/config/$(arg racecar_version)/vehicle_footprint.yaml" />
 
+  <!--if we have multiple cars we need multiple namespaces-->
+  <arg name="namespace" default="racecar2"/>
+
   <group ns="vehicle_geometry">
     <!-- set parameters -->
     <rosparam file="$(arg vehicle_geometry_config)" command="load" />
@@ -14,7 +17,9 @@
     <node if="$(arg publish_footprint)" name="footprint" pkg="rostopic" type="rostopic" args="pub -l -f '$(arg vehicle_footprint_config)' footprint geometry_msgs/PolygonStamped" />
 
     <!-- static transforms -->
-    <include if="$(arg publish_static_transforms)" file="$(find racecar)/launch/includes/$(arg racecar_version)/static_transforms.launch.xml" />
+    <include if="$(arg publish_static_transforms)" file="$(find racecar)/launch/includes/$(arg racecar_version)/static_transforms.launch.xml">
+	<arg name="namespace" value="$(arg namespace)"/>
+    </include>
 
   </group>
   
