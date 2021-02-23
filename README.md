@@ -15,4 +15,3 @@ This repository contains a host of ROS package for the F1Tenth Autonomous Racing
 - /zed/zed_node/left/image_rect_color
 - /zed/zed_node/right/image_rect_color
 - /zed/zed_node/stereo/image_rect_color: stereo rectified pair images side-by-side
-
