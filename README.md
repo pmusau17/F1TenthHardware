@@ -27,4 +27,3 @@ For those interesting in watching videos of our safety assurance implementation 
 - /zed/zed_node/left/image_rect_color
 - /zed/zed_node/right/image_rect_color
 - /zed/zed_node/stereo/image_rect_color: stereo rectified pair images side-by-side
-
