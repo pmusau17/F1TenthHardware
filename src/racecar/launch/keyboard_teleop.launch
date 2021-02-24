@@ -43,6 +43,13 @@
 
   <!--the odometry drifts if you don't reset it each lap--> 
   <node name="reset_odom" pkg="racecar" type="reset_odometry.py" args="$(arg namespace)" output="log" />
+
+  <!-- localization node-->
+  <include file="$(find particle_filter)/launch/localize.launch">
+  	<arg name="namespace" value="$(arg namespace)"/>
+  </include>
+
+  
   
   
 
