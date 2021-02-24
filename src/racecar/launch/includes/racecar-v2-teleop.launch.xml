@@ -3,10 +3,12 @@
   <arg name="racecar_version" value="racecar-v2" />
   <arg name="imu_model" default="$(optenv RACECAR_IMU razor_imu_m0)" doc="imu sensor types [razor_imu, razor_imu_m0]" />
   <arg name="run_camera" default="false"/>
+  <arg name="namespace" default="racecar2"/>
 
   <!-- vehicle geometry parameters, footprint, and static transforms -->
   <include file="$(find racecar)/launch/includes/common/vehicle_geometry.launch.xml">
     <arg name="racecar_version" value="$(arg racecar_version)" />
+    <arg name="namespace" value="$(arg namespace)"/>
   </include>
 
   <!-- joystick to ackermann command -->
@@ -31,12 +33,13 @@
   <!-- start electronic speed controller driver -->
   <include file="$(find racecar)/launch/includes/$(arg racecar_version)/vesc.launch.xml" >
     <arg name="racecar_version" value="$(arg racecar_version)" />
+    <arg name="namespace" value="$(arg namespace)"/>
   </include>
 
   <!-- start imu and laser scanner -->
   <include file="$(find racecar)/launch/includes/common/sensors.launch.xml" >
     <arg name="racecar_version" value="$(arg racecar_version)" />
-    <arg name="imu_model" value="$(arg imu_model)" />    
+    <arg name="imu_model" value="$(arg imu_model)" />  
   </include>
 
 </launch>

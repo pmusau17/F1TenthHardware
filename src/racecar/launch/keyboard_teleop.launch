@@ -3,18 +3,60 @@
   <arg name="racecar_version" default="$(optenv RACECAR_VERSION racecar-v2)" doc="system version [racecar-v1, racecar-v2]" />
   <arg name="imu_model" default="$(optenv RACECAR_IMU razor_imu_m0)" doc="imu sensor types [razor_imu, razor_imu_m0]" />
   <arg name="run_camera" default="false"/>
+  
+  <!--Launch the map file from SLAM-->
+  <arg name="map_file" default= "patmap4.yaml"/>
 
+  <!--if we have multiple cars we need multiple namespaces-->
+  <arg name="namespace" default="racecar2"/>
+
+  <!--specify speed -->
+  <arg name="velocity" default="1.0"/>
+
+  <group ns="$(arg namespace)">
+   
+  <!-- Launch the racecar version provided by the F1Tenth Community-->
   <include file="$(find racecar)/launch/includes/$(arg racecar_version)-teleop.launch.xml">
     <arg name="imu_model" value="$(arg imu_model)" />
     <arg name="run_camera" value="$(arg run_camera)" />
+    <arg name="namespace" value="$(arg namespace)"/>
+  
+   </include>
+  
+  <!--Launch the zed camera node--> 
+  <include file="$(find zed_wrapper)/launch/zed.launch">
+	<arg name="namespace" value="$(arg namespace)"/>
+  </include>
+  </group>
+	
+
+  <!--This node isn't terribly useful, it does some hand shaking between a custom defined message type and the vesc-ackermann
+      publishing-->
+  <node name="sim_connector" pkg="racecar" type="sim_connector.py" output="screen" args="$(arg namespace)" />
+
+
+  <!--speed node-->
+  <node name="speed_node" pkg="racecar" type="speed_node.py" args="$(arg namespace) $(arg velocity)" output="log" />
+
+  <!--map server-->
+  <node pkg='map_server2' name="map_server" type="map_server" args="$(find racecar)/maps/$(arg map_file)"/>
+
+  <!--the odometry drifts if you don't reset it each lap--> 
+  <node name="reset_odom" pkg="racecar" type="reset_odometry.py" args="$(arg namespace)" output="log" />
+
+  <!-- localization node-->
+  <include file="$(find particle_filter)/launch/localize.launch">
+  	<arg name="namespace" value="$(arg namespace)"/>
   </include>
 
-  <node name="sim_connector" pkg="racecar" type="sim_connector.py" output="screen" />
-  <!--<node name="reset_odom" pkg="racecar" type="reset_odometry.py" output="screen" />-->
-  <!--<node name="sanity_check" pkg="racecar" type="process_and_plot_lidar_data.py"/>-->
-  <node name="key_board" pkg="racecar" type="keyboard.py" output="screen" />
+  
+  
+  
 
-  <!--Launch the zed camera node -->
-  <include file="$(find zed_wrapper)/launch/zed.launch"/>
+
+<!--<node name="reset_odom" pkg="racecar" type="reset_odometry.py" output="screen" />-->
+  <!--<node name="sanity_check" pkg="racecar" type="process_and_plot_lidar_data.py"/>-->
+  <node name="key_board" pkg="racecar" type="keyboard.py" args="$(arg namespace)" output="screen" />
+  
 
 </launch>

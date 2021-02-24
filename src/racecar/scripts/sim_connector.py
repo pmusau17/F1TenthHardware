@@ -6,7 +6,7 @@ from ackermann_msgs.msg import AckermannDriveStamped
 
 import math
 
-pub = rospy.Publisher('/ackermann_cmd_mux/input/teleop', AckermannDriveStamped, queue_size=5)
+
 
 def vel_and_angle(data):
 	
@@ -23,11 +23,17 @@ def vel_and_angle(data):
 	pub.publish(msg)
 
 
-def listener():
-	rospy.init_node('sim_connect', anonymous=True)
-	rospy.Subscriber('drive_parameters', drive_param, vel_and_angle)
-	rospy.spin()
+
+	
 
 
 if __name__=="__main__":
-	listener()
+	rospy.init_node('sim_connect', anonymous=True)
+        args = rospy.myargv()[1:]
+        if(len(args)==1):
+           racecar_name = args[0]
+        else:
+           racecar_name = ''
+        pub = rospy.Publisher(racecar_name+'/ackermann_cmd_mux/input/teleop', AckermannDriveStamped, queue_size=5)
+	rospy.Subscriber(racecar_name+'/drive_parameters', drive_param, vel_and_angle)
+	rospy.spin()

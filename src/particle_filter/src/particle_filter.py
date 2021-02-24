@@ -51,6 +51,7 @@ class ParticleFiler():
         self.MAX_RANGE_METERS  = float(rospy.get_param("~max_range"))
         self.THETA_DISCRETIZATION = int(rospy.get_param("~theta_discretization"))
         self.WHICH_RM          = rospy.get_param("~range_method", "cddt").lower()
+	self.NAMESPACE         = rospy.get_param("~namespace", "").lower()
         self.RANGELIB_VAR      = int(rospy.get_param("~rangelib_variant", "3"))
         self.SHOW_FINE_TIMING  = bool(rospy.get_param("~fine_timing", "0"))
         self.PUBLISH_ODOM      = bool(rospy.get_param("~publish_odom", "1"))
@@ -109,13 +110,13 @@ class ParticleFiler():
         self.initialize_global()
 
         # these topics are for visualization
-        self.pose_pub      = rospy.Publisher("/pf/viz/inferred_pose", PoseStamped, queue_size = 1)
-        self.particle_pub  = rospy.Publisher("/pf/viz/particles", PoseArray, queue_size = 1)
-        self.pub_fake_scan = rospy.Publisher("/pf/viz/fake_scan", LaserScan, queue_size = 1)
-        self.rect_pub      = rospy.Publisher("/pf/viz/poly1", PolygonStamped, queue_size = 1)
+        self.pose_pub      = rospy.Publisher(self.NAMESPACE+"/pf/viz/inferred_pose", PoseStamped, queue_size = 1)
+        self.particle_pub  = rospy.Publisher(self.NAMESPACE+"/pf/viz/particles", PoseArray, queue_size = 1)
+        self.pub_fake_scan = rospy.Publisher(self.NAMESPACE+"/pf/viz/fake_scan", LaserScan, queue_size = 1)
+        self.rect_pub      = rospy.Publisher(self.NAMESPACE+"/pf/viz/poly1", PolygonStamped, queue_size = 1)
 
         if self.PUBLISH_ODOM:
-            self.odom_pub = rospy.Publisher("/pf/pose/odom", Odometry, queue_size = 1)
+            self.odom_pub = rospy.Publisher(self.NAMESPACE+"/pf/pose/odom", Odometry, queue_size = 1)
 
         # these topics are for coordinate space things
         self.pub_tf = tf.TransformBroadcaster()

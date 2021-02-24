@@ -17,6 +17,7 @@ import os
 # write operation succeeded
 devnull = open(os.devnull,'w')
 start = 0
+racecar_name = ''
 def subscribe_data(data):
     global start
     quaternion = np.array([data.pose.pose.orientation.x, 
@@ -36,18 +37,23 @@ def subscribe_data(data):
     #print(x,y,euler[2],duration)
     if(abs(x) < 0.09 and abs(y)<0.09 and abs(euler[2])<0.15 and duration>5):
         rospy.logwarn("reset_odometry")
-        subprocess.Popen(["rosservice","call", "/zed/zed_node/reset_odometry"],stdout=devnull,stderr=devnull)
-        subprocess.Popen(["rosservice","call","/zed/zed_node/reset_tracking"],stdout=devnull,stderr=devnull)
+        subprocess.Popen(["rosservice","call", racecar_name+"/zed/zed_node/reset_odometry"],stdout=devnull,stderr=devnull)
+        subprocess.Popen(["rosservice","call", racecar_name+"/zed/zed_node/reset_tracking"],stdout=devnull,stderr=devnull)
         start = rospy.Time.now()
 
 
 
 def listener():
-    rospy.Subscriber('pf/pose/odom', Odometry, subscribe_data)
+    rospy.Subscriber(racecar_name+'/pf/pose/odom', Odometry, subscribe_data)
     rospy.spin()
 
 
 if __name__=="__main__":
     rospy.init_node('reset_odom_node', anonymous=True)
+    args = rospy.myargv()[1:]
+    if(len(args)==1):
+       racecar_name = "/"+args[0]
+    else:
+       racecar_name = ''
     start = rospy.Time.now() 
     listener()

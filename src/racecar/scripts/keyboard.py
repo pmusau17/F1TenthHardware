@@ -2,10 +2,11 @@
 
 import rospy
 from racecar.msg import drive_param
+from ackermann_msgs.msg import AckermannDriveStamped
 
 import sys, select, termios, tty
 
-pub = rospy.Publisher('drive_parameters', drive_param, queue_size=10)
+
 
 keyBindings = {
   'w':(1,0),
@@ -30,6 +31,12 @@ if __name__=="__main__":
 
   settings = termios.tcgetattr(sys.stdin)
   rospy.init_node('keyboard', anonymous=True)
+  args = rospy.myargv()[1:]
+  if(len(args)==1):
+    racecar_name = args[0]
+  else:
+    racecar_name = ''
+  pub = rospy.Publisher(racecar_name+'/ackermann_cmd_mux/input/teleop', AckermannDriveStamped, queue_size=10)
 
   x = 0
   th = 0
@@ -46,13 +53,23 @@ if __name__=="__main__":
           th = 0
           if (key == '\x03'):
              break
+       
        msg = drive_param()
-
-
        msg.velocity = x*speed
        msg.angle = th*turn
        rospy.loginfo(str(msg.velocity))
        rospy.loginfo(str(msg.angle))
+       print(x*speed,th*turn)
+
+       msg = AckermannDriveStamped();
+       msg.header.stamp = rospy.Time.now();
+       msg.header.frame_id = "base_link";
+
+       msg.drive.speed = x*speed
+       msg.drive.acceleration = 1
+       msg.drive.jerk = 1
+       msg.drive.steering_angle = th*turn
+       msg.drive.steering_angle_velocity = 1
 
        pub.publish(msg)
 
@@ -61,10 +78,18 @@ if __name__=="__main__":
 
   finally:
     msg = drive_param()
-
-
     msg.velocity = 0
     msg.angle = 0
+
+    msg = AckermannDriveStamped();
+    msg.header.stamp = rospy.Time.now();
+    msg.header.frame_id = "base_link";
+
+    msg.drive.speed = x*speed
+    msg.drive.acceleration = 1
+    msg.drive.jerk = 1
+    msg.drive.steering_angle = th*turn
+    msg.drive.steering_angle_velocity = 1
     pub.publish(msg)
 
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
