@@ -17,7 +17,7 @@ class DisparityExtenderDriving(object):
 
     #constructor for our DisparityExtenderDrivng Object
     #stores configuration parameters neccessary for successful execution of our algorithm
-    def __init__(self):
+    def __init__(self,racecar_name):
 
         # This is actually "half" of the car width, plus some tolerance.
         # Controls the amount disparities are extended by.
@@ -80,10 +80,10 @@ class DisparityExtenderDriving(object):
 
         #publisher for speed and angles 
 
-        self.pub_drive_param = rospy.Publisher('drive_parameters',drive_param, queue_size=5)
+        self.pub_drive_param = rospy.Publisher(racecar_name+'/drive_parameters',drive_param, queue_size=5)
 
         #this functionality depends on a functioning LIDAR so it subscribes to the lidar scans
-        rospy.Subscriber('scan', LaserScan, self.lidar_callback)
+        rospy.Subscriber(racecar_name+'/scan', LaserScan, self.lidar_callback)
 
         #create a variable that will store the lidar distances
         self.lidar_distances=None
@@ -330,6 +330,11 @@ class DisparityExtenderDriving(object):
 
 if __name__ == '__main__':
     rospy.init_node('disparity_extender', anonymous=True)
-    extendObj=DisparityExtenderDriving()
+    args = rospy.myargv()[1:]
+    if(len(args)==1):
+       racecar_name = args[0]
+    else:
+       racecar_name = ''
+    extendObj=DisparityExtenderDriving(racecar_name)
     #wait three seconds so that the simulation sets up properly
     rospy.spin()

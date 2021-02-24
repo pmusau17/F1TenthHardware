@@ -17,13 +17,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <robot name="zed_camera">
-
 <!-- base_link -->
-    <link name="base_link_c" />
+    <link name="racecar2/base_link_c" />
 
 <!-- Camera Center -->
     <joint name="zed_camera_center_joint" type="fixed">
-        <parent link="base_link_c"/>
+        <parent link="racecar2/base_link_c"/>
         <child link="zed_camera_center"/>
         <origin xyz="0 0 0" rpy="0 0 0" />
     </joint>

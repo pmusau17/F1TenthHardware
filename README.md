@@ -27,3 +27,9 @@ For those interesting in watching videos of our safety assurance implementation 
 - /zed/zed_node/left/image_rect_color
 - /zed/zed_node/right/image_rect_color
 - /zed/zed_node/stereo/image_rect_color: stereo rectified pair images side-by-side
+
+
+### If you have multiple cars 
+
+- Change the namespace parameter in the launch file [src/racecar/launch/keyboard_teleop.launch]
+- Change the link name to the corresponding name in this [urdf file](src/zed-ros-wrapper/zed_wrapper/urdf/zed.urdf) so that the static transforms are done correctly 
