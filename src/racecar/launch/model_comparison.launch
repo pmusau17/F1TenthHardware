@@ -4,25 +4,33 @@
   
   
   
-  
-  
+
 <arg name="algorithm" default="0"/>
 <arg name="algorithm_name" if="$(eval arg('algorithm')==0)" value="e2e"/>
 <arg name="algorithm_name" if="$(eval arg('algorithm')==1)" value="sac"/>
 <arg name="algorithm_name" if="$(eval arg('algorithm')==2)" value="ddpg"/>
 <arg name="algorithm_name" if="$(eval arg('algorithm')==3)" value="e2e_all"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==4)" value="e2e_walker"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==5)" value="e2e_barca"/>
 
 <!--network model utilized for end-to-end driving-->
 <arg name="model_name" default="fnn_lidar_porto.hdf5"/>
 <arg name="model_name2" default="fnn_lidar_all.hdf5"/>
+<arg name="model_name3" default="fnn_lidar_walker.hdf5"/>
+<arg name="model_name4" default="fnn_lidar_barca.hdf5"/>
 
 <arg name="lidar_topic" default="scan"/>
 <arg name="vesc_topic" default="/ackermann_cmd_mux/input/teleop"/>
 <arg name="velocity" default="1.0"/>
+<arg name="timeout" default="60"/>
 
 
 <!--End to end learning controller-->
     <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==0)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name) $(arg velocity)"/>
+    <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==4)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name3) $(arg velocity)"/>
+    <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==5)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name4) $(arg velocity)"/>
+
+
 
     <!--reinforcement learning controllers-->
     <node pkg="racecar" name="sac_controller" type="sac_controller.py" if="$(eval arg('algorithm')==1)" args="$(arg vesc_topic)  $(arg lidar_topic) $(arg velocity)" required="true" output="log"/>
@@ -33,6 +41,7 @@
     <!--End to end learning controller-->
     <node pkg="racecar" type="lidar_classification.py" name="e2e_all" required='true' if="$(eval arg('algorithm')==3)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name2) $(arg velocity)"/>
 
-  
+    <!--Timeout node-->
+    <node pkg="racecar_gazebo" type="kill_simulation.py" name="timeout" required="true" args = "$(arg timeout)" output="screen"/>
   
 </launch>
