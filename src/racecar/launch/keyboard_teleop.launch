@@ -5,7 +5,7 @@
   <arg name="run_camera" default="false"/>
   
   <!--Launch the map file from SLAM-->
-  <arg name="map_file" default= "patmap4.yaml"/>
+  <arg name="map_file" default= "feb24.yaml"/>
 
   <!--if we have multiple cars we need multiple namespaces-->
   <arg name="namespace" default="racecar2"/>
@@ -32,31 +32,32 @@
 
   <!--This node isn't terribly useful, it does some hand shaking between a custom defined message type and the vesc-ackermann
       publishing-->
-  <node name="sim_connector" pkg="racecar" type="sim_connector.py" output="screen" args="$(arg namespace)" />
+  <node name="$(arg namespace)_sim_connector" pkg="racecar" type="sim_connector.py" output="screen" args="$(arg namespace)" />
 
 
-  <!--speed node-->
-  <node name="speed_node" pkg="racecar" type="speed_node.py" args="$(arg namespace) $(arg velocity)" output="log" />
+  <!--speed node
+  <node name="$(arg namespace)_speed_node" pkg="racecar" type="speed_node.py" args="$(arg namespace) $(arg velocity)" output="log" />-->
 
-  <!--map server-->
-  <node pkg='map_server2' name="map_server" type="map_server" args="$(find racecar)/maps/$(arg map_file)"/>
+  <!--map server
+  <node pkg='map_server2' name="map_server" type="map_server" args="$(find racecar)/maps/$(arg map_file)"/>-->
 
-  <!--the odometry drifts if you don't reset it each lap--> 
-  <node name="reset_odom" pkg="racecar" type="reset_odometry.py" args="$(arg namespace)" output="log" />
+  <!--the odometry drifts if you don't reset it each lap
+  <node name="$(arg namespace)_reset_odom" pkg="racecar" type="reset_odometry.py" args="$(arg namespace)" output="log" />--> 
 
-  <!-- localization node-->
+  <!-- localization node
   <include file="$(find particle_filter)/launch/localize.launch">
   	<arg name="namespace" value="$(arg namespace)"/>
-  </include>
+  </include>-->
 
-  
+   <!--map server-->
+  <node pkg='rtreach' name="visualize_obs" type="visualize_obs" args="/$(arg namespace)/zed/zed_node/camera_odom 1 0.5 100" output="screen"/>
   
   
 
 
 <!--<node name="reset_odom" pkg="racecar" type="reset_odometry.py" output="screen" />-->
   <!--<node name="sanity_check" pkg="racecar" type="process_and_plot_lidar_data.py"/>-->
-  <node name="key_board" pkg="racecar" type="keyboard.py" args="$(arg namespace)" output="screen" />
+  <!--<node name="key_board" pkg="racecar" type="keyboard.py" args="$(arg namespace)" output="screen" />-->
   
 
 </launch>

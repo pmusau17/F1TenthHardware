@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <!-- ROS URDF description of the ZED -->
     <group if="$(arg publish_urdf)">
         <param name="zed_description" textfile="$(find zed_wrapper)/urdf/$(arg camera_model).urdf" />
-        <node name="zed_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <node name="$(arg namespace)_zed_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
             <remap from="robot_description" to="zed_description" />
         </node>
     </group>
@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <rosparam file="$(find zed_wrapper)/params/common.yaml" command="load" />
         <rosparam file="$(find zed_wrapper)/params/$(arg camera_model).yaml" command="load" />
 	<rosparam param="general/base_frame" subst_value ="True">$(arg namespace)/base_link_c</rosparam>
+	<rosparam param="tracking/odometry_frame" subst_value ="True">$(arg namespace)/camera_odom</rosparam>
 
         <!-- SVO file path -->
         <param name="svo_file"          value="$(arg svo_file)" />

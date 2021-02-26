@@ -160,7 +160,7 @@ class DisparityExtenderDriving(object):
             self.publish_speed_and_angle(thresholded_angle,0.0)
             rospy.logwarn("STOOOOOOOPP")
         else:
-            self.publish_speed_and_angle(thresholded_angle,0.7)
+            self.publish_speed_and_angle(thresholded_angle,0.4)
 
     """Scale the speed in accordance to the forward distance"""
     def threshold_speed(self,velocity,forward_distance,straight_ahead_distance):

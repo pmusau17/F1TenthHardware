@@ -176,7 +176,7 @@ class ParticleFiler():
 
         # this may cause issues with the TF tree. If so, see the below code.
         self.pub_tf.sendTransform((pose[0],pose[1],0),tf.transformations.quaternion_from_euler(0, 0, pose[2]), 
-               stamp , "/laser", "/map")
+               stamp , self.NAMESPACE+"/laser", "/map")
 
         # also publish odometry to facilitate getting the localization pose
         if self.PUBLISH_ODOM:
@@ -208,7 +208,7 @@ class ParticleFiler():
         map_laser_pos -= np.dot(tf.transformations.quaternion_matrix(tf.transformations.unit_vector(map_laser_rotation))[:3,:3], laser_base_link_offset).T
 
         # Publish transform
-        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , "/base_link_c", "/map")
+        self.pub_tf.sendTransform(map_laser_pos, map_laser_rotation, stamp , self.NAMESPACE+"/base_link_c", "/map")
 
     def visualize(self):
         '''
@@ -254,7 +254,7 @@ class ParticleFiler():
     def publish_scan(self, angles, ranges):
         # publish the given angels and ranges as a laser scan message
         ls = LaserScan()
-        ls.header = Utils.make_header("laser", stamp=self.last_stamp)
+        ls.header = Utils.make_header(self.NAMESPACE+"laser", stamp=self.last_stamp)
         ls.angle_min = np.min(angles)
         ls.angle_max = np.max(angles)
         ls.angle_increment = np.abs(angles[0] - angles[1])

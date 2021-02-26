@@ -14,10 +14,11 @@
   <!-- joystick to ackermann command -->
   <include file="$(find racecar)/launch/includes/common/joy_teleop.launch.xml" >
     <arg name="racecar_version" value="$(arg racecar_version)" />
+    <arg name="namespace" value="$(arg namespace)"/>
   </include>
 
   <!-- default (zero) ackermann command -->
-  <node name="zero_ackermann_cmd" pkg="rostopic" type="rostopic" args="pub -r 4 ackermann_cmd_mux/input/default ackermann_msgs/AckermannDriveStamped '{header: auto, drive: {steering_angle: 0.0, speed: 0.0} }'" />
+  <node name="$(arg namespace)_zero_ackermann_cmd" pkg="rostopic" type="rostopic" args="pub -r 4 ackermann_cmd_mux/input/default ackermann_msgs/AckermannDriveStamped '{header: auto, drive: {steering_angle: 0.0, speed: 0.0} }'" />
 
   <!-- priority-based command multiplexer -->
   <include file="$(find ackermann_cmd_mux)/launch/standalone.launch">
@@ -28,6 +29,7 @@
   <!-- controllers -->
   <include file="$(find racecar)/launch/includes/common/controllers.launch.xml">  
     <arg name="racecar_version" value="$(arg racecar_version)" />
+    <arg name="namespace" value="$(arg namespace)"/>
   </include>
   
   <!-- start electronic speed controller driver -->

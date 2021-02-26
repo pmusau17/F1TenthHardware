@@ -14,7 +14,7 @@
     <rosparam file="$(arg vehicle_geometry_config)" command="load" />
 
     <!-- publish footprint polygon -->
-    <node if="$(arg publish_footprint)" name="footprint" pkg="rostopic" type="rostopic" args="pub -l -f '$(arg vehicle_footprint_config)' footprint geometry_msgs/PolygonStamped" />
+    <node if="$(arg publish_footprint)" name="$(arg namespace)_footprint" pkg="rostopic" type="rostopic" args="pub -l -f '$(arg vehicle_footprint_config)' footprint geometry_msgs/PolygonStamped" />
 
     <!-- static transforms -->
     <include if="$(arg publish_static_transforms)" file="$(find racecar)/launch/includes/$(arg racecar_version)/static_transforms.launch.xml">
