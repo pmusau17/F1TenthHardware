@@ -5,7 +5,7 @@ This repository contains a host of ROS package for the F1Tenth Autonomous Racing
 ### Real-time Reachability Experiments
 ![LEC_GIF](images/hardware_experiments.gif)
 
-For those interesting in watching videos of our safety assurance implementation utilizing the real-time reachability algorithm, the videos can be found here [images](images)
+For those interesting in watching videos of our safety assurance implementation utilizing the real-time reachability algorithm, the videos can be found [here](images).
 
 ### Package List
 
