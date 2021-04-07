@@ -1,0 +1,60 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+
+  
+  
+  
+
+<arg name="algorithm" default="0"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==0)" value="e2e"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==1)" value="sac"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==2)" value="ddpg"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==3)" value="e2e_all"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==4)" value="e2e_walker"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==5)" value="e2e_barca"/>
+
+<!--network model utilized for end-to-end driving-->
+<arg name="model_name" default="fnn_lidar_porto.hdf5"/>
+<arg name="model_name2" default="fnn_lidar_all.hdf5"/>
+<arg name="model_name3" default="fnn_lidar_walker.hdf5"/>
+<arg name="model_name4" default="fnn_lidar_barca.hdf5"/>
+
+<arg name="lidar_topic" default="scan"/>
+<arg name="vesc_topic" default="angle_msg"/>
+<arg name="velocity" default="1.0"/>
+<arg name="timeout" default="60"/>
+
+
+<!--End to end learning controller-->
+    <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==0)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name) $(arg velocity) 1 "/>
+    <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==4)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name3) $(arg velocity) 1"/>
+    <node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==5)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name4) $(arg velocity) 1"/>
+     
+
+     <!-- These are the nodes for publishing the reachability information for each of the vehicles-->
+     <!--<node name="vehicle_1" pkg="rtreach" type="visualize_obs" args="racecar2  1.0 2.0 10" output="log"/>-->
+     <node name="vehicle_2" pkg="rtreach" type="visualize_obs" args="racecar3  1.0 2.0 10" output="log"/>
+
+
+    <!-- decision manager
+    <node pkg="racecar" type="rtreach_decision_manager.py" name="decision_manager" args="car vesc2" output="screen"/>-->
+     
+     <!--Node for Visualizing reachsets that allows customization through parameters-->
+     <node name="vis_agent_param" pkg="rtreach" type="vis_node_param" output="screen" args="10 1.0 20 1"/> 
+
+    <!--reinforcement learning controllers-->
+    <node pkg="racecar" name="sac_controller" type="sac_controller.py" if="$(eval arg('algorithm')==1)" args="$(arg vesc_topic)  $(arg lidar_topic) $(arg velocity) 1" required="true" output="log"/>
+
+
+    <node pkg="racecar" name="ddpg_controller" type="ddpg_controller.py" if="$(eval arg('algorithm')==2)" args="$(arg vesc_topic)  $(arg lidar_topic) $(arg velocity) 1 " required="true" output="log"/>
+
+    <!--End to end learning controller-->
+    <node pkg="racecar" type="lidar_classification.py" name="e2e_all" required='true' if="$(eval arg('algorithm')==3)" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name2) $(arg velocity) 1"/>
+
+    <!--plot reachability results-->
+    <node pkg="race" type="plot_reachability_results.py" name="res_plot" required="false" output="screen"/>
+
+    <!--Node for wall points-->
+    <node name="wall_points" pkg="racecar" type="publish_wall_points.py" output="screen" args="feb24"/>
+  
+</launch>

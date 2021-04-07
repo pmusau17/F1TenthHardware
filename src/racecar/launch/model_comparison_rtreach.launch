@@ -1,0 +1,35 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+<arg name="algorithm" default="0"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==0)" value="e2e_image"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==1)" value="e2e"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==2)" value="sac"/>
+<arg name="algorithm_name" if="$(eval arg('algorithm')==3)" value="ars"/>
+<arg name="car_name" default="racecar"/>
+
+<!--network model utilized for end-to-end driving-->
+<arg name="model_name" default="fnn_lidar_porto.hdf5"/>
+<arg name="model_name2" default="dave_elu_adam_82.hdf5"/>
+
+
+<arg name="lidar_topic" default="scan"/>
+<arg name="vesc_topic" default="/ackermann_cmd_mux/input/teleop"/>
+<arg name="velocity" default="1.0"/>
+<arg name="timeout" default="60"/>
+
+
+<!--End to end learning controller-->
+<node pkg="racecar" type="lidar_classification.py" name="e2e" required='true' if="$(eval arg('algorithm')==1)" output="screen" args="$(arg vesc_topic) $(arg lidar_topic) $(find race)/models/$(arg model_name) $(arg velocity) 1 1"/>
+<!--Launch The Controllers-->
+<node pkg="computer_vision" name="lec_model" type="ros_dave.py" if="$(eval arg('algorithm')==0)" args="$(arg car_name) $(find computer_vision)models/$(arg model_name2) $(arg velocity) 1" required="true" output="log"/>
+<!--reinforcement learning controllers-->
+<node pkg="rl" name="sac_controller" type="sac_controller.py" if="$(eval arg('algorithm')==2)" args="$(arg lidar_topic) $(arg velocity) 1 1" required="true" output="log"/>
+<node pkg="rl" name="lec_model" type="ars_controller.py" if="$(eval arg('algorithm')==3)"  args="$(arg car_name) 1" required="true" output="log"/>
+
+
+<!--Timeout node-->
+<node pkg="racecar_gazebo" type="kill_simulation.py" name="timeout" required="true" args = "$(arg timeout)" output="screen"/>
+  
+</launch>
+
+

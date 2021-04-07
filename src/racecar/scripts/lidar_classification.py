@@ -32,7 +32,7 @@ class LidarFNNNode:
         # subscripe to the ackermann commands and lidar topic
         self.decoupled = decoupled
         if(self.decoupled):
-            self.pub = rospy.Publisher(self.vesc_name, angle_msg, queue_size=5)
+            self.pub = rospy.Publisher("angle_msg", angle_msg, queue_size=5)
         else:
             self.pub= rospy.Publisher(vesc_topic, AckermannDriveStamped, queue_size=5)
 
@@ -86,6 +86,9 @@ if __name__=='__main__':
     model_path = args[2]
 
     vel = float(args[3])
+
+    for i in range(100):
+       print(len(args))
 
     if (len(args)>4):
         mf=LidarFNNNode(vesc_name,lidar_topic,model_path,velocity=vel,decoupled=True)
